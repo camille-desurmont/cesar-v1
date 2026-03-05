@@ -1,0 +1,26 @@
+# ---
+# UI Deployment = run the static web app (HTML/JS) in one or more pods. We use
+# 1 replica here; you can set replicas: 2 for redundancy. The image usually
+# serves files with nginx on port 80.
+# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cesar-ui
+  labels:
+    app: cesar-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cesar-ui
+  template:
+    metadata:
+      labels:
+        app: cesar-ui
+    spec:
+      containers:
+        - name: ui
+          image: cesar-ui:latest
+          ports:
+            - containerPort: 80

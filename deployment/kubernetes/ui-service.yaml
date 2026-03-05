@@ -1,0 +1,15 @@
+# ---
+# UI Service = other pods (or Ingress) reach the UI at "cesar-ui:80". Single
+# entry point even if you scale the UI deployment to multiple replicas.
+# ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cesar-ui
+spec:
+  selector:
+    app: cesar-ui
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

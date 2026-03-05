@@ -1,0 +1,35 @@
+# ---
+# Blue-Green: "Green" = the other slot. Build your new image, deploy this with
+# that image (e.g. cesar-api:v2). The Service (api-service-blue-green.yaml)
+# still points at env=blue. Test green by calling its pod or a temporary
+# service. When ready, change the Service selector to env=green and apply.
+# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cesar-api-green
+  labels:
+    app: cesar-api
+    env: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cesar-api
+      env: green
+  template:
+    metadata:
+      labels:
+        app: cesar-api
+        env: green
+    spec:
+      containers:
+        - name: api
+          image: cesar-api:v2   # Use your new version here
+          ports:
+            - containerPort: 8000
+          env:
+            - name: CESAR_MODEL_PATH
+              value: "/artifacts/model_latest.joblib"
+            - name: CESAR_CONTRACT_PATH
+              value: "/artifacts/contract_latest.json"

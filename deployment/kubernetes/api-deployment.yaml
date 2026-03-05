@@ -1,0 +1,49 @@
+# ---
+# Deployment = "run this image in N copies (pods)". Kubernetes keeps N running;
+# if one crashes, it starts another. We use 2 replicas so traffic is spread and
+# one pod can be down briefly without dropping all requests.
+# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cesar-api
+  labels:
+    app: cesar-api
+    version: stable   # Used by the Service selector; canary has version=canary
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cesar-api
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: cesar-api
+        version: stable
+    spec:
+      containers:
+        - name: api
+          image: cesar-api:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: CESAR_MODEL_PATH
+              value: "/artifacts/model_latest.joblib"
+            - name: CESAR_CONTRACT_PATH
+              value: "/artifacts/contract_latest.json"
+          # Optional: mount a volume here so the pod can read model/contract files.
+          # volumeMounts:
+          #   - name: artifacts
+          #     mountPath: /artifacts
+          # Uncomment for production: readiness = "is the pod ready to receive traffic?"
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 8000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+      # volumes:
+      #   - name: artifacts
+      #     persistentVolumeClaim:
+      #       claimName: cesar-artifacts

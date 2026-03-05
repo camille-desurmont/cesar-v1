@@ -26,6 +26,16 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# MacOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+$SystemVolumeInformation/
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -205,3 +215,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# CESAR artifact storage (keep .gitkeep)
+/artifact_storage/*.joblib
+/artifact_storage/contract_*.json

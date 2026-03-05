@@ -1,0 +1,55 @@
+# pyproject.toml is the modern, standard way to define a Python project and its dependencies.
+# It replaces requirements.txt: one file for metadata, build system, and dependencies.
+# See: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+
+[project]
+name = "cesar"
+version = "0.1.0"
+description = "CESAR – CentraleSupelec-ESSEC System for Asset Rating"
+readme = "README.md"
+requires-python = ">=3.11"
+
+# Production-ready systems should pin dependency versions. Unpinned or loose versions (e.g. "fastapi")
+# can lead to "works on my machine" failures when a new release changes behavior. Here we use
+# compatible-release specifiers: "~=X.Y" means >= X.Y but < X.(Y+1). So "fastapi~=0.115" allows
+# 0.115.x (patch updates) but not 0.116.0. This gives reproducible installs while still
+# receiving security and bug fixes. For even stricter reproducibility, teams often use a lock
+# file (e.g. uv lock, pip-tools) that records exact versions.
+dependencies = [
+    "fastapi~=0.115",
+    "uvicorn[standard]~=0.32",
+    "pydantic~=2.0",
+    "joblib~=1.4",
+    "scikit-learn~=1.5",
+    "numpy~=1.26",
+    "pandas~=2.0",
+    "typer~=0.12",
+    "httpx~=0.27",
+]
+
+# This registers the "cesar" command. After "pip install -e ." you can run: cesar batch run,
+# cesar predict-one run, cesar acceptance-tests run. All CLI code lives in the cli/ folder.
+[project.scripts]
+cesar = "cli.main:main"
+
+# The build system defines how the package is built (wheel, sdist). Hatchling is a modern,
+# lightweight backend; the same pyproject.toml is used for both editable installs and publishing.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "prediction_contract",
+    "cli",
+    "runtime",
+    "runtime.prediction_api",
+    "runtime.batch_prediction",
+    "runtime.inference",
+    "training",
+    "training.asset_rating_model",
+    "training.scripts",
+    "model_acceptance_tests",
+    "comparison",
+    "comparison.api_version_comparison",
+]

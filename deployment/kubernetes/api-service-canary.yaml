@@ -1,0 +1,18 @@
+# ---
+# Canary service = separate entry point for the canary deployment. The main
+# Service (api-service.yaml) sends traffic to version=stable; this one sends
+# traffic to version=canary. Ingress or a proxy can send e.g. 10% of requests
+# to cesar-api-canary:8000 and 90% to cesar-api:8000.
+# ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cesar-api-canary
+spec:
+  selector:
+    app: cesar-api
+    version: canary
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
