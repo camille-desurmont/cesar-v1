@@ -25,6 +25,7 @@ dependencies = [
     "pandas~=2.0",
     "typer~=0.12",
     "httpx~=0.27",
+    "anthropic~=0.40",
 ]
 
 # This registers the "cesar" command. After "pip install -e ." you can run: cesar batch run,
@@ -45,6 +46,7 @@ packages = [
     "runtime",
     "runtime.prediction_api",
     "runtime.batch_prediction",
+    "runtime.query",
     "runtime.inference",
     "training",
     "training.asset_rating_model",
