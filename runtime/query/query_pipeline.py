@@ -10,6 +10,7 @@ from runtime.inference.load_artifact import load_artifact_from_path
 from runtime.query.llm_parser import parse_query
 from runtime.query.search_criteria import SearchCriteria
 from runtime.query.data_search import load_apartment_data, search_properties
+from runtime.query.undervaluation import flag_undervalued
 
 
 class PropertyMatch(BaseModel):
@@ -21,6 +22,9 @@ class PropertyMatch(BaseModel):
     estimated_price_eur: float | None
     date_mutation: str
     code_postal: str
+    discount_pct: float | None = None
+    is_undervalued: bool | None = None
+    value_rank: int | None = None
 
 
 class QueryResult(BaseModel):
@@ -91,6 +95,8 @@ def run_query(
             date_mutation=str(row.get("date_mutation", "")),
             code_postal=str(row.get("code_postal", "")),
         ))
+
+    flag_undervalued(matches)
 
     return QueryResult(
         query=user_query,
