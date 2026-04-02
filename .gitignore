@@ -219,3 +219,19 @@ __marimo__/
 # CESAR artifact storage (keep .gitkeep)
 /artifact_storage/*.joblib
 /artifact_storage/contract_*.json
+
+# CESAR log files
+*_log.txt
+
+# Temp files
+data/tempCodeRunnerFile.py
+
+# Claude Code
+.claude/
+
+# Vite cache
+.vite/
+
+# Node
+node_modules/
+runtime/rating_ui/package-lock.json

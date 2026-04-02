@@ -4,12 +4,23 @@ The real work lives in runtime.query. This file only defines the CLI.
 """
 
 import json
+import logging
 import os
+import traceback
 from pathlib import Path
 
 import typer
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from runtime.query.query_pipeline import run_query
+
+logging.basicConfig(
+    filename="query_log.txt",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
 
 
 query_app = typer.Typer(help="Query apartments using natural language.")
@@ -20,7 +31,7 @@ def run_query_cmd(
     query: str = typer.Argument(..., help="Natural language query (e.g. '3-room apartment under 500k')"),
     data_csv: Path = typer.Option(
         None, "--data", "-d", path_type=Path,
-        help="Path to data CSV (default: CESAR_DATA_CSV or data/dvf_75115_000CM.csv)",
+        help="Path to data CSV (default: CESAR_DATA_CSV or data/dvf_75015_all_years.csv)",
     ),
     model_path: Path | None = typer.Option(None, "--model", "-m", path_type=Path),
     contract_path: Path | None = typer.Option(None, "--contract", "-c", path_type=Path),
@@ -29,7 +40,7 @@ def run_query_cmd(
     """Search for apartments matching a natural language description."""
     # Resolve data CSV path
     if data_csv is None:
-        data_csv = Path(os.environ.get("CESAR_DATA_CSV", "data/dvf_75115_000CM.csv"))
+        data_csv = Path(os.environ.get("CESAR_DATA_CSV", "data/dvf_75015_all_years.csv"))
     if not data_csv.exists():
         typer.echo(f"Error: Data CSV not found: {data_csv}", err=True)
         raise typer.Exit(1)
@@ -45,8 +56,11 @@ def run_query_cmd(
             contract_path = Path(env_contract)
 
     try:
+        logging.info(f"Query: {query!r} | data={data_csv} | model={model_path} | contract={contract_path}")
         result = run_query(query, data_csv, model_path, contract_path)
-    except RuntimeError as e:
+        logging.info(f"OK — {result.total_matches} matches")
+    except Exception as e:
+        logging.error(f"Query failed: {e}\n{traceback.format_exc()}")
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1)
 

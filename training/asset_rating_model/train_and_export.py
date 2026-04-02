@@ -51,6 +51,8 @@ def build_feature_matrix(df: pd.DataFrame) -> np.ndarray:
 
 
 def train_on_dataframe(df: pd.DataFrame) -> Any:
+    df = df.dropna(subset=[TARGET_NAME, "surface_reelle_bati"])
+    df = df[df["type_local"].isin(TYPE_LOCAL_CATEGORIES)]
     X = build_feature_matrix(df)
     y = df[TARGET_NAME].values.astype(np.float64)
     reg = RandomForestRegressor(n_estimators=50, max_depth=10, random_state=42)

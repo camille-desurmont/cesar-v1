@@ -8,8 +8,6 @@ TARGET_NAME: str = "valeur_fonciere"
 TYPE_LOCAL_CATEGORIES: list[str] = [
     "Appartement",
     "Maison",
-    "Dépendance",
-    "Local industriel. commercial ou assimilé",
 ]
 
 # Order of columns in the design matrix (after encoding). Used by train_and_export and contract.

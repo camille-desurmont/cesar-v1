@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 # Property types observed in DVF (subset used by default model).
 # Ideas: extend with more types or make this configurable from contract.
-TYPE_LOCAL_VALUES = Literal["Appartement", "Maison", "Dépendance", "Local industriel. commercial ou assimilé"]
+TYPE_LOCAL_VALUES = Literal["Appartement", "Maison"]
 
 
 class EstimateRequest(BaseModel):
