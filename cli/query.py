@@ -72,7 +72,9 @@ def run_query_cmd(
         typer.echo(f"Found {result.total_matches} matching properties:\n")
 
         for i, match in enumerate(result.matches, 1):
-            typer.echo(f"  {i}. {match.adresse} ({match.code_postal})")
+            flag = " 🔥 UNDERVALUED" if match.is_undervalued else ""
+            rank = f" [deal rank #{match.value_rank}]" if match.value_rank is not None else ""
+            typer.echo(f"  {i}. {match.adresse} ({match.code_postal}){flag}{rank}")
             typer.echo(f"     Type: {match.type_local}")
             if match.surface_m2:
                 typer.echo(f"     Surface: {match.surface_m2} m²")
@@ -82,5 +84,8 @@ def run_query_cmd(
                 typer.echo(f"     Actual price: €{match.actual_price_eur:,.0f}")
             if match.estimated_price_eur:
                 typer.echo(f"     ML estimate:  €{match.estimated_price_eur:,.0f}")
+            if match.discount_pct is not None:
+                direction = "below" if match.discount_pct >= 0 else "above"
+                typer.echo(f"     Valuation gap: {abs(match.discount_pct):.1f}% {direction} estimate")
             typer.echo(f"     Date: {match.date_mutation}")
             typer.echo()
