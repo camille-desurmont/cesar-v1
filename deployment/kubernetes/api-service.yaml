@@ -1,0 +1,17 @@
+# ---
+# Service = stable DNS name and load-balancing in front of pods. Other pods (or
+# Ingress) call "cesar-api:8000"; Kubernetes sends traffic to one of the 2 API pods.
+# The selector must match the Deployment's pod template labels (app=cesar-api, version=stable).
+# ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cesar-api
+spec:
+  selector:
+    app: cesar-api
+    version: stable
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

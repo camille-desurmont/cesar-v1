@@ -1,0 +1,17 @@
+# ---
+# Blue-Green: ONE service that sends traffic to either blue or green. Default:
+# selector env=blue. To switch to the new version, change env to green and
+# apply: kubectl apply -f api-service-blue-green.yaml (after editing selector).
+# ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cesar-api
+spec:
+  selector:
+    app: cesar-api
+    env: blue   # Change to "green" when you want to switch to the green deployment
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
