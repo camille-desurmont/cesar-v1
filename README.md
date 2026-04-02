@@ -35,7 +35,17 @@ pip install -e .
 cd runtime/rating_ui && npm ci
 ```
 
-### 2. Train
+### 2. Download data
+
+DVF data files are not stored in the repository. Download them before training:
+
+```bash
+python data/download_dvf_paris.py
+```
+
+This downloads Paris property transaction data (2020–2024) from data.gouv.fr and saves one CSV per arrondissement in `data/`. The default data file used by the query CLI is `data/dvf_75015_all_years.csv` (Paris 15th), which is included in this download.
+
+### 3. Train
 
 **Simple way (recommended):** Put your CSV file(s) in the `data/` folder. Each CSV must have the same columns and at least: `surface_reelle_bati`, `nombre_pieces_principales`, `code_departement`, `type_local`, `valeur_fonciere`. Then:
 
@@ -49,7 +59,7 @@ The script loads every `*.csv` in `data/`, checks that all files have the same c
 
 This writes `artifact_storage/model_<version>.joblib` and `artifact_storage/contract_<version>.json`. Symlink or set `CESAR_MODEL_PATH` and `CESAR_CONTRACT_PATH` to these files.
 
-### 3. Batch CLI
+### 4. Batch CLI
 
 ```bash
 export CESAR_MODEL_PATH=artifact_storage/model_20250101120000.joblib
@@ -57,7 +67,7 @@ export CESAR_CONTRACT_PATH=artifact_storage/contract_20250101120000.json
 cesar batch run --input input.csv --output output.csv
 ```
 
-### 4. Single-record CLI
+### 5. Single-record CLI
 
 ```bash
 cesar predict-one run --surface 50 --pieces 3 --departement 75 --type Appartement
@@ -67,7 +77,7 @@ cesar predict-one run --surface 50 --pieces 3 --departement 75 --type Appartemen
 
 Use `--model` / `--contract` or set `CESAR_MODEL_PATH` and `CESAR_CONTRACT_PATH`. Valid `--type` values: `Appartement`, `Maison`, `Dépendance`, `Local industriel. commercial ou assimilé`.
 
-### 5. API
+### 6. API
 
 ```bash
 uvicorn runtime.prediction_api.app:app --reload --host 0.0.0.0 --port 8000
@@ -75,7 +85,7 @@ uvicorn runtime.prediction_api.app:app --reload --host 0.0.0.0 --port 8000
 
 Set `CESAR_MODEL_PATH` and `CESAR_CONTRACT_PATH` in the environment.
 
-### 6. UI
+### 7. UI
 
 ```bash
 cd runtime/rating_ui && npm run dev
@@ -83,7 +93,7 @@ cd runtime/rating_ui && npm run dev
 
 Open the dev URL (e.g. http://localhost:5173). Set `window.CESAR_API_BASE = 'http://localhost:8000'` in the browser console if the API is on another origin.
 
-### 7. Acceptance tests
+### 8. Acceptance tests
 
 Test cases are defined in Python in `model_acceptance_tests/test_cases.py`. Edit that file to add or change cases. With the API running:
 
@@ -92,11 +102,11 @@ export CESAR_API_URL=http://localhost:8000
 cesar acceptance-tests run
 ```
 
-### 8. Version comparison
+### 9. Version comparison
 
 Use `comparison.api_version_comparison.run_comparison` with a `CompareConfig` (two base URLs and a list of inputs). Ideas: implement diff of `estimated_value_eur`, regression criteria, or a report.
 
-### 9. Experiment tracking (simple)
+### 10. Experiment tracking (simple)
 
 When you train often (different data, parameters, or ideas), it’s easy to forget what you did and which model version was best. **Experiment tracking** means: write down each run (when, what you used, what you got) in one place so you can compare later.
 
@@ -148,8 +158,7 @@ Organized by **difficulty / scope** (from small to larger).
 
 2. **Medium**
    - Complete the API version comparison: diff responses, define regression criteria, output a small report (HTML or JSON).
-   - CI/CD: e.g. GitHub Actions to build Docker images and run acceptance tests.
-   - Deployment: add Kubernetes readiness/liveness probes, HPA, ingress, or GitOps.
+   - CI/CD: e.g. GitHub Actions to run acceptance tests on every push.
 
 3. **Larger**
    - Authentication/authorization on the API.
@@ -167,7 +176,6 @@ Code is grouped by MLOps phase so students can navigate easily.
 - **training/** – `asset_rating_model/` (train and export), `scripts/` (e.g. minimal CSV demo), `experiment_log.py` (simple run logging to a CSV).
 - **model_acceptance_tests/** – hardcoded test cases in Python, runner; CLI is in `cli/acceptance_tests.py`.
 - **comparison/** – `api_version_comparison/` (config and stub to compare two APIs).
-- **deployment/** – Dockerfiles, docker-compose, Kubernetes manifests.
 - **artifact_storage/** – directory for model and contract (versioned names); created on first train.
 
 ---
@@ -201,12 +209,11 @@ Pick one option and plug it into the API and (optionally) the UI; even a simple 
 - Add one extra endpoint, e.g. GET `/model_info`, that returns the contract version and feature names. Useful for scripts or the UI to show “which model is running”.
 
 **Deployment and ops**
-- Run the API and UI with `docker compose`, then try the canary or blue-green Kubernetes manifests. Switch traffic from “blue” to “green” once and watch the rollout. No need to design a full pipeline; the goal is to feel what a zero-downtime switch is.
 - Add a simple GitHub Action that runs acceptance tests on every push. One YAML file that installs deps, starts the API (with a test model), and runs `cesar acceptance-tests run`.
 
 **Combining ideas**
 - “Data + experiment log”: train on two different data mixes, log each run with `experiment_log`, then compare which version the acceptance tests prefer.
 - “MCP + UI”: build the MCP server, then use it from a small script or from Cursor’s MCP client to get estimates; keep the existing UI for demos.
-- “API + deployment”: add `/health` and `/model_info`, then add readiness/liveness probes in the Kubernetes deployment so the cluster only sends traffic when the model is loaded.
+- “API + CI”: add `/health` and `/model_info`, then add a GitHub Action that checks the API is healthy before running acceptance tests.
 
 Pick something that excites you and fits your timeline; even one of these will deepen your understanding of the stack.
