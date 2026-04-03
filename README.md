@@ -78,7 +78,7 @@ Properties where either price is missing are left unscored.
 ### Launch the UI
 Set env vars and start the server (to type in the terminal): 
 
-- export CESAR_DATA_CSV=data/dvf_75015_all_years.csv
+- export CESAR_DATA_CSV=data/dvf_75015_all_years.csv # here need to change the number of the arrondissement 
 - export CESAR_MODEL_PATH=artifact_storage/model_minimal.joblib
 - export CESAR_CONTRACT_PATH=artifact_storage/contract_minimal.json
 
@@ -105,3 +105,4 @@ Disclaimer: The UI was built with AI assistance, using the following prompt: "Ba
 - **Data range:** DVF data covers 2020–2024. The model does not account for market drift after the training period.
 - **Property types:** only `Appartement`, `Maison`, `Dépendance`, `Local industriel`,  `commercial ou assimilé`.
 - **Undervaluation signal:** the gap between actual transaction price and ML estimate reflects model error as much as a true deal, it should not be taken as financial advice.
+- **Limited UI:** for the moment the UI is only based on the arrondissement the user imports
