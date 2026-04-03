@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CESAR — Apartment Search</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.04em; }
+    header span { font-size: 0.85rem; opacity: 0.55; }
+
+    .search-wrapper {
+      max-width: 720px;
+      margin: 2.5rem auto 0;
+      padding: 0 1.5rem;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 2px solid #dde1e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.15s;
+      background: #fff;
+    }
+    .search-box input:focus { border-color: #4f6ef7; }
+
+    .search-box button {
+      padding: 0.75rem 1.5rem;
+      background: #4f6ef7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .search-box button:hover { background: #3a58e0; }
+    .search-box button:disabled { background: #a0aec0; cursor: default; }
+
+    .hint {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      color: #8a94a6;
+    }
+
+    .filters-row {
+      margin-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .filters-row label { font-size: 0.82rem; color: #555; display: flex; align-items: center; gap: 0.35rem; }
+    .filters-row input[type=range] { width: 110px; accent-color: #4f6ef7; }
+    .filters-row span.val { font-weight: 600; color: #1a1a2e; min-width: 2.5ch; }
+
+    .results-header {
+      max-width: 720px;
+      margin: 2rem auto 0.75rem;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .results-header h2 { font-size: 0.95rem; font-weight: 600; color: #555; }
+    .sort-select { font-size: 0.82rem; padding: 0.3rem 0.5rem; border: 1px solid #dde1e9; border-radius: 6px; background: #fff; }
+
+    .results {
+      max-width: 720px;
+      margin: 0 auto 3rem;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+      border-left: 4px solid #dde1e9;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: box-shadow 0.15s;
+    }
+    .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .card.undervalued { border-left-color: #22c55e; }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .card-address { font-weight: 600; font-size: 1rem; }
+    .card-postal { font-size: 0.8rem; color: #8a94a6; margin-top: 0.15rem; }
+
+    .badge {
+      flex-shrink: 0;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 99px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge.deal { background: #dcfce7; color: #16a34a; }
+    .badge.rank { background: #eff6ff; color: #2563eb; }
+
+    .card-meta {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.2rem;
+      font-size: 0.83rem;
+      color: #555;
+    }
+    .card-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .card-prices {
+      margin-top: 0.9rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .price-block { flex: 1; min-width: 130px; }
+    .price-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #8a94a6; }
+    .price-value { font-size: 1.05rem; font-weight: 700; margin-top: 0.15rem; }
+    .price-value.actual { color: #1a1a2e; }
+    .price-value.estimate { color: #4f6ef7; }
+
+    .discount-bar-wrap {
+      margin-top: 0.75rem;
+    }
+    .discount-label {
+      font-size: 0.77rem;
+      color: #555;
+      margin-bottom: 0.3rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .discount-label strong { color: #16a34a; }
+    .discount-bar-bg {
+      height: 6px;
+      background: #e9ecef;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .discount-bar-fill {
+      height: 100%;
+      background: #22c55e;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .discount-bar-fill.negative { background: #f97316; }
+
+    .card-date { margin-top: 0.6rem; font-size: 0.75rem; color: #aaa; }
+
+    /* States */
+    .state {
+      max-width: 720px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+      text-align: center;
+      color: #8a94a6;
+    }
+    .state.loading .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #dde1e9;
+      border-top-color: #4f6ef7;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state.error { color: #dc2626; }
+    .state p { font-size: 0.95rem; }
+    .state .criteria-pill {
+      display: inline-block;
+      margin: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      background: #eff6ff;
+      color: #2563eb;
+      border-radius: 99px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>CESAR</h1>
+  <span>Apartment Search &amp; Valuation</span>
+</header>
+
+<div class="search-wrapper">
+  <div class="search-box">
+    <input id="query-input" type="text" placeholder="e.g. 3-room apartment under 500k in Paris 15th" autocomplete="off" />
+    <button id="search-btn">Search</button>
+  </div>
+  <p class="hint">Natural language search — try "2-room apartment under 400k" or "house with 4 rooms"</p>
+  <div class="filters-row">
+    <label>
+      Min. discount to flag as undervalued:
+      <input type="range" id="threshold-slider" min="5" max="50" step="5" value="20" />
+      <span class="val" id="threshold-val">20%</span>
+    </label>
+  </div>
+</div>
+
+<div id="results-header" class="results-header" style="display:none">
+  <h2 id="results-count"></h2>
+  <select id="sort-select" class="sort-select">
+    <option value="default">Sort: default</option>
+    <option value="discount">Best deal first</option>
+    <option value="price_asc">Price ↑</option>
+    <option value="price_desc">Price ↓</option>
+  </select>
+</div>
+
+<div id="status" class="state" style="display:none"></div>
+<div id="results" class="results"></div>
+
+<script>
+  const queryInput = document.getElementById('query-input');
+  const searchBtn = document.getElementById('search-btn');
+  const statusEl = document.getElementById('status');
+  const resultsEl = document.getElementById('results');
+  const resultsHeader = document.getElementById('results-header');
+  const resultsCount = document.getElementById('results-count');
+  const sortSelect = document.getElementById('sort-select');
+  const thresholdSlider = document.getElementById('threshold-slider');
+  const thresholdVal = document.getElementById('threshold-val');
+
+  let lastMatches = [];
+
+  thresholdSlider.addEventListener('input', () => {
+    thresholdVal.textContent = thresholdSlider.value + '%';
+    if (lastMatches.length > 0) renderMatches(lastMatches);
+  });
+
+  sortSelect.addEventListener('change', () => {
+    if (lastMatches.length > 0) renderMatches(lastMatches);
+  });
+
+  queryInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doSearch();
+  });
+  searchBtn.addEventListener('click', doSearch);
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString('fr-FR') + ' €';
+  }
+
+  function showLoading() {
+    statusEl.style.display = 'block';
+    statusEl.className = 'state loading';
+    statusEl.innerHTML = '<div class="spinner"></div><p>Searching…</p>';
+    resultsEl.innerHTML = '';
+    resultsHeader.style.display = 'none';
+  }
+
+  function showError(msg) {
+    statusEl.style.display = 'block';
+    statusEl.className = 'state error';
+    statusEl.innerHTML = `<p>${msg}</p>`;
+  }
+
+  function showCriteria(criteria) {
+    const entries = Object.entries(criteria).filter(([, v]) => v != null);
+    if (!entries.length) return '';
+    const pills = entries.map(([k, v]) =>
+      `<span class="criteria-pill">${k}: ${v}</span>`
+    ).join('');
+    return `<div style="margin-top:0.75rem">${pills}</div>`;
+  }
+
+  function sortedMatches(matches) {
+    const threshold = parseInt(thresholdSlider.value, 10);
+    // Apply client-side threshold
+    const tagged = matches.map(m => ({
+      ...m,
+      is_undervalued: m.discount_pct != null && m.discount_pct >= threshold,
+    }));
+
+    const mode = sortSelect.value;
+    if (mode === 'discount') {
+      return [...tagged].sort((a, b) => (b.discount_pct ?? -Infinity) - (a.discount_pct ?? -Infinity));
+    }
+    if (mode === 'price_asc') {
+      return [...tagged].sort((a, b) => (a.actual_price_eur ?? Infinity) - (b.actual_price_eur ?? Infinity));
+    }
+    if (mode === 'price_desc') {
+      return [...tagged].sort((a, b) => (b.actual_price_eur ?? -Infinity) - (a.actual_price_eur ?? -Infinity));
+    }
+    return tagged;
+  }
+
+  function renderMatches(matches) {
+    const sorted = sortedMatches(matches);
+    const threshold = parseInt(thresholdSlider.value, 10);
+    const undervaluedCount = sorted.filter(m => m.is_undervalued).length;
+
+    resultsCount.textContent = `${sorted.length} result${sorted.length !== 1 ? 's' : ''}` +
+      (undervaluedCount ? ` · ${undervaluedCount} undervalued` : '');
+
+    resultsEl.innerHTML = sorted.map(m => cardHTML(m, threshold)).join('');
+  }
+
+  function cardHTML(m, threshold) {
+    const undervalued = m.is_undervalued;
+    const hasPrices = m.actual_price_eur != null && m.estimated_price_eur != null;
+    const discountPct = m.discount_pct;
+
+    let badges = '';
+    if (undervalued) badges += `<span class="badge deal">Undervalued</span>`;
+    if (m.value_rank != null) badges += `<span class="badge rank">#${m.value_rank} deal</span>`;
+
+    let pricesHTML = '';
+    if (hasPrices) {
+      pricesHTML = `
+        <div class="card-prices">
+          <div class="price-block">
+            <div class="price-label">Transaction price</div>
+            <div class="price-value actual">${fmt(m.actual_price_eur)}</div>
+          </div>
+          <div class="price-block">
+            <div class="price-label">ML estimate</div>
+            <div class="price-value estimate">${fmt(m.estimated_price_eur)}</div>
+          </div>
+        </div>`;
+    } else if (m.actual_price_eur != null) {
+      pricesHTML = `
+        <div class="card-prices">
+          <div class="price-block">
+            <div class="price-label">Transaction price</div>
+            <div class="price-value actual">${fmt(m.actual_price_eur)}</div>
+          </div>
+        </div>`;
+    }
+
+    let discountHTML = '';
+    if (discountPct != null) {
+      const clamped = Math.min(Math.abs(discountPct), 60);
+      const barWidth = (clamped / 60 * 100).toFixed(1);
+      const negative = discountPct < 0;
+      const label = negative
+        ? `${Math.abs(discountPct).toFixed(1)}% <strong style="color:#f97316">above estimate</strong>`
+        : `${discountPct.toFixed(1)}% <strong>below estimate</strong>`;
+      discountHTML = `
+        <div class="discount-bar-wrap">
+          <div class="discount-label"><span>${label}</span><span style="color:#aaa;font-size:0.72rem">threshold: ${threshold}%</span></div>
+          <div class="discount-bar-bg"><div class="discount-bar-fill ${negative ? 'negative' : ''}" style="width:${barWidth}%"></div></div>
+        </div>`;
+    }
+
+    return `
+      <div class="card ${undervalued ? 'undervalued' : ''}">
+        <div class="card-top">
+          <div>
+            <div class="card-address">${m.adresse || '—'}</div>
+            <div class="card-postal">${m.code_postal}</div>
+          </div>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end">${badges}</div>
+        </div>
+        <div class="card-meta">
+          <span>🏠 ${m.type_local}</span>
+          ${m.surface_m2 != null ? `<span>📐 ${m.surface_m2} m²</span>` : ''}
+          ${m.rooms != null ? `<span>🚪 ${m.rooms} room${m.rooms !== 1 ? 's' : ''}</span>` : ''}
+        </div>
+        ${pricesHTML}
+        ${discountHTML}
+        <div class="card-date">${m.date_mutation}</div>
+      </div>`;
+  }
+
+  async function doSearch() {
+    const q = queryInput.value.trim();
+    if (!q) return;
+
+    showLoading();
+    searchBtn.disabled = true;
+
+    try {
+      const res = await fetch('/query/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || res.statusText);
+      }
+
+      const data = await res.json();
+      lastMatches = data.matches || [];
+
+      statusEl.style.display = 'block';
+      statusEl.className = 'state';
+      statusEl.innerHTML = showCriteria(data.parsed_criteria);
+      if (!statusEl.innerHTML.trim()) statusEl.style.display = 'none';
+
+      resultsHeader.style.display = 'flex';
+      renderMatches(lastMatches);
+
+    } catch (err) {
+      showError('Search failed: ' + err.message);
+    } finally {
+      searchBtn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
