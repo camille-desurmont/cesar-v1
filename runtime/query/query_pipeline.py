@@ -56,6 +56,7 @@ def run_query(
     csv_path: Path,
     model_path: Path | None = None,
     contract_path: Path | None = None,
+    undervaluation_threshold_pct: float = 20.0,
 ) -> QueryResult:
     """Full pipeline: parse natural language → search data → enrich with ML estimates."""
     # 1. Parse the query
@@ -96,7 +97,7 @@ def run_query(
             code_postal=str(row.get("code_postal", "")),
         ))
 
-    flag_undervalued(matches)
+    flag_undervalued(matches, threshold_pct=undervaluation_threshold_pct)
 
     return QueryResult(
         query=user_query,

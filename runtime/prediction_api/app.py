@@ -53,6 +53,7 @@ def index() -> FileResponse:
 
 class QueryRequest(BaseModel):
     query: str
+    undervaluation_threshold_pct: float = 20.0
 
 
 @app.post("/query/", response_model=QueryResult)
@@ -67,7 +68,8 @@ def post_query(request: QueryRequest) -> QueryResult:
     contract_path = Path(contract_path_str) if contract_path_str else None
 
     try:
-        return run_query(request.query, data_csv, model_path, contract_path)
+        return run_query(request.query, data_csv, model_path, contract_path,
+                         undervaluation_threshold_pct=request.undervaluation_threshold_pct)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
