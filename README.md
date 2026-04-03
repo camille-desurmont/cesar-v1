@@ -103,6 +103,6 @@ Disclaimer: The UI was built with AI assistance, using the following prompt: "Ba
 - **Geography:** trained only on Paris (department 75). Estimates for other departments will be unreliable.
 - **Features:** only four inputs: surface, rooms, department, property type. Location within Paris (arrondissement, street) is not used.
 - **Data range:** DVF data covers 2020–2024. The model does not account for market drift after the training period.
-- **Property types:** only `Appartement`, `Maison`, `Dépendance`, `Local industriel`,  `commercial ou assimilé`.
+- **Property types:** only `Appartement`, `Maison`.
 - **Undervaluation signal:** the gap between actual transaction price and ML estimate reflects model error as much as a true deal, it should not be taken as financial advice.
 - **Limited UI:** for the moment the UI is only based on the arrondissement the user imports
