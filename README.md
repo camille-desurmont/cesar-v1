@@ -68,11 +68,32 @@ export CESAR_DATA_CSV=data/dvf_75015_all_years.csv
 
 For each result that has both an actual transaction price and an ML estimate, `flag_undervalued` (`runtime/query/undervaluation.py`) computes:
 
-- **`discount_pct`** – how much cheaper the actual price is relative to the ML estimate: `(estimate − actual) / estimate × 100`. Positive = potential deal.
-- **`is_undervalued`** – `True` when `discount_pct ≥ 20%` (configurable via `threshold_pct`).
-- **`value_rank`** – rank among all scored results (1 = best deal).
+- **`discount_pct`**: how much cheaper the actual price is relative to the ML estimate: `(estimate − actual) / estimate × 100`. Positive = potential deal.
+- **`is_undervalued`**: `True` when `discount_pct ≥ 20%` (configurable via `threshold_pct`).
+- **`value_rank`**: rank among all scored results (1 = best deal).
 
 Properties where either price is missing are left unscored.
+
+### Launch the UI
+Set env vars and start the server (to type in the terminal): 
+
+- export CESAR_DATA_CSV=data/dvf_75015_all_years.csv
+- export CESAR_MODEL_PATH=artifact_storage/model_minimal.joblib
+- export CESAR_CONTRACT_PATH=artifact_storage/contract_minimal.json
+
+python3 -m uvicorn runtime.prediction_api.app:app --reload
+Then open http://localhost:8000.
+
+What the UI does:
+
+- Natural language search bar: queries the LLM parser + data search + ML estimates
+- Each result shows a card with address, type, surface, rooms, transaction price vs ML estimate, and a visual discount bar
+- Undervalued properties (discount ≥ threshold) get a green border and badge
+- A slider lets you adjust the undervaluation threshold (5–50%) live without re-searching
+- Sort by best deal, price ascending/descending
+- Parsed filters from the LLM are shown as pills so you can see how your query was interpreted
+
+Disclaimer: The UI was built with AI assistance, using the following prompt: "Based on the following repository, I want to create an intuitive user interface. The client will input a query: number of rooms, price, and neighborhood. The query bar should be placed at the top-center of the page. Once the query is launched, the results should be displayed in the middle of the page, with the following information visible: address, neighborhood, type of housing, the price, our estimated price."
 
 ---
 
