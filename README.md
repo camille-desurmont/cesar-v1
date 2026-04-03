@@ -52,10 +52,11 @@ cesar query run "3-room apartment under 500k" --model artifact_storage/model_<ve
 ```
 
 **Pipeline** (`runtime/query/query_pipeline.py`):
-1. The user's query is parsed by an LLM into structured filters (`surface`, `rooms`, `price`, etc.).
-2. The DVF CSV is loaded and filtered against those criteria.
-3. For each matching property, the ML model produces a price estimate from `surface_reelle_bati`, `nombre_pieces_principales`, `code_departement`, and `type_local`.
-4. Undervaluation signals are computed and attached to each result.
+1. Export ANTHROPIC_API_KEY=your_api_key_here
+2. The user's query is parsed by an LLM into structured filters (`surface`, `rooms`, `price`, etc.).
+3. The DVF CSV is loaded and filtered against those criteria.
+4. For each matching property, the ML model produces a price estimate from `surface_reelle_bati`, `nombre_pieces_principales`, `code_departement`, and `type_local`.
+5. Undervaluation signals are computed and attached to each result.
 
 The model and contract paths can also be set via environment variables:
 ```bash
@@ -69,7 +70,7 @@ export CESAR_DATA_CSV=data/dvf_75015_all_years.csv
 For each result that has both an actual transaction price and an ML estimate, `flag_undervalued` (`runtime/query/undervaluation.py`) computes:
 
 - **`discount_pct`**: how much cheaper the actual price is relative to the ML estimate: `(estimate − actual) / estimate × 100`. Positive = potential deal.
-- **`is_undervalued`**: `True` when `discount_pct ≥ 20%` (configurable via `threshold_pct`).
+- **`is_undervalued`**: `True` when `discount_pct ≥ 20%` (configurable via `threshold_pct`) or directly on the UI. 
 - **`value_rank`**: rank among all scored results (1 = best deal).
 
 Properties where either price is missing are left unscored.
@@ -93,7 +94,7 @@ What the UI does:
 - Sort by best deal, price ascending/descending
 - Parsed filters from the LLM are shown as pills so you can see how your query was interpreted
 
-Disclaimer: The UI was built with AI assistance, using the following prompt: "Based on the following repository, I want to create an intuitive user interface. The client will input a query: number of rooms, price, and neighborhood. The query bar should be placed at the top-center of the page. Once the query is launched, the results should be displayed in the middle of the page, with the following information visible: address, neighborhood, type of housing, the price, our estimated price."
+Disclaimer: The UI was built with AI assistance, using the following prompt: "Based on the following repository, I want to create an intuitive user interface. The client will input a query: number of rooms, price, neighborhood. The user should also be able to adapt the undervalued threshold. The query bar should be placed at the top-center of the page. Once the query is launched, the results should be displayed in the middle of the page, with the following information visible: address, neighborhood, type of housing, the price, our estimated price. The user should also be able to sort the query by: best deal, high price, low price."
 
 ---
 
@@ -102,5 +103,5 @@ Disclaimer: The UI was built with AI assistance, using the following prompt: "Ba
 - **Geography:** trained only on Paris (department 75). Estimates for other departments will be unreliable.
 - **Features:** only four inputs: surface, rooms, department, property type. Location within Paris (arrondissement, street) is not used.
 - **Data range:** DVF data covers 2020–2024. The model does not account for market drift after the training period.
-- **Property types:** only `Appartement`, `Maison`, `Dépendance`, `Local industriel. commercial ou assimilé`.
+- **Property types:** only `Appartement`, `Maison`, `Dépendance`, `Local industriel`,  `commercial ou assimilé`.
 - **Undervaluation signal:** the gap between actual transaction price and ML estimate reflects model error as much as a true deal, it should not be taken as financial advice.
