@@ -1,6 +1,6 @@
 # CESAR – CentraleSupelec-ESSEC System for Asset Rating
 
-CESAR estimates the value of a Paris property from a small set of features (surface, number of rooms, arrondissement, property type) using a machine learning model trained on DVF transaction data.
+CESAR estimates the value of a Paris property from a small set of features (surface, number of rooms, arrondissement, property type) using a machine learning model trained on DVF transaction data. Imagine having a friend who has studied thousands of real Paris property sales and can instantly tell you whether a flat is a good deal or overpriced — that's what CESAR does, so you don't   need to be a market expert to make a confident buying decision.
 
 ---
 
