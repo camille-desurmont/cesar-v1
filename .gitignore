@@ -226,6 +226,10 @@ __marimo__/
 # Temp files
 data/tempCodeRunnerFile.py
 
+# DVF data CSVs (regenerate with: python data/download_dvf_paris.py)
+data/*.csv
+data/archive/
+
 # Claude Code
 .claude/
 
