@@ -18,7 +18,10 @@ def search_properties(df: pd.DataFrame, criteria: SearchCriteria) -> pd.DataFram
     df["nombre_pieces_principales"] = pd.to_numeric(df["nombre_pieces_principales"], errors="coerce")
     df["valeur_fonciere"] = pd.to_numeric(df["valeur_fonciere"], errors="coerce")
 
-    mask = pd.Series(True, index=df.index)
+    # Keep only open-market sales above a realistic minimum price.
+    # DVF includes exchanges, court sales, off-plan and other transaction types
+    # that don't reflect market value and would distort results.
+    mask = (df["nature_mutation"] == "Vente") & (df["valeur_fonciere"] > 10_000)
 
     if criteria.type_local is not None:
         mask &= df["type_local"].str.lower() == criteria.type_local.lower()
@@ -42,7 +45,7 @@ def search_properties(df: pd.DataFrame, criteria: SearchCriteria) -> pd.DataFram
         mask &= df["valeur_fonciere"] <= criteria.max_price
 
     if criteria.code_postal is not None:
-        mask &= df["code_postal"] == criteria.code_postal
+        mask &= df["code_postal"].isin(criteria.code_postal)
 
     if criteria.nom_commune is not None:
         mask &= df["nom_commune"].str.contains(criteria.nom_commune, case=False, na=False)

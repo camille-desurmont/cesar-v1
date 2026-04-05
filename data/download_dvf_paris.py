@@ -57,6 +57,7 @@ def main(years: list[int], arrondissements: list[str]) -> None:
     combined = pd.concat(frames, ignore_index=True)
     combined["code_postal"] = combined["code_postal"].astype(str).str.strip()
 
+    all_subsets = []
     for arr in arrondissements:
         subset = combined[combined["code_postal"] == arr].drop(columns=["_year"])
         if subset.empty:
@@ -65,6 +66,13 @@ def main(years: list[int], arrondissements: list[str]) -> None:
         out_path = OUTPUT_DIR / f"dvf_{arr}_all_years.csv"
         subset.to_csv(out_path, sep=";", index=False)
         print(f"  Saved {len(subset):,} rows -> {out_path.name}")
+        all_subsets.append(subset)
+
+    if len(arrondissements) > 1 and all_subsets:
+        combined_out = pd.concat(all_subsets, ignore_index=True)
+        combined_path = OUTPUT_DIR / "dvf_75_all_arrondissements.csv"
+        combined_out.to_csv(combined_path, sep=";", index=False)
+        print(f"\n  Combined file: {len(combined_out):,} rows -> {combined_path.name}")
 
     print("\nDone.")
 

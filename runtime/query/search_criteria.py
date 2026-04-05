@@ -11,6 +11,6 @@ class SearchCriteria(BaseModel):
     max_rooms: int | None = Field(None, description="Maximum number of main rooms")
     min_price: float | None = Field(None, description="Minimum transaction price in EUR")
     max_price: float | None = Field(None, description="Maximum transaction price in EUR")
-    code_postal: str | None = Field(None, description="Postal code (e.g. 75015)")
+    code_postal: list[str] | None = Field(None, description="List of postal codes (e.g. [\"75011\", \"75017\"])")
     nom_commune: str | None = Field(None, description="Commune name (partial match)")
     adresse_nom_voie: str | None = Field(None, description="Street name (partial match)")
