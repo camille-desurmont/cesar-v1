@@ -6,14 +6,14 @@ from runtime.query.search_criteria import SearchCriteria
 
 
 SYSTEM_PROMPT = """You are a search filter extractor for a French real estate transaction database.
-The database contains properties in Paris 15th arrondissement (code postal 75015).
+The database contains properties across all Paris districts (code postal 75001 - 75020).
 
 Available columns and their meanings:
 - surface_reelle_bati: living area in m²
 - nombre_pieces_principales: number of main rooms
 - valeur_fonciere: transaction price in EUR
 - type_local: one of Appartement, Maison, Dépendance, Local industriel. commercial ou assimilé
-- code_postal: postal code (75015)
+- code_postal: list of postal codes to search (e.g. ["75011", "75017"] for 11th and 17th)
 - nom_commune: commune name (e.g. Paris 15e Arrondissement)
 - adresse_nom_voie: street name (e.g. RUE ANDRE GIDE)
 

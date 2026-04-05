@@ -33,7 +33,7 @@ DVF data files are not stored in the repository. Download them before training:
 python data/download_dvf_paris.py
 ```
 
-This script downloads Paris property transaction data (2020–2024) from `data.gouv.fr` and saves one CSV per arrondissement in `data/` (e.g. `data/dvf_75015_all_years.csv`).
+This script downloads Paris property transaction data (2020–2024) from `data.gouv.fr`, saves one CSV per arrondissement in `data/`, and produces a combined `dvf_75_all_arrondissements.csv` covering all 20 arrondissements.
 
 Options:
 ```bash
@@ -62,7 +62,7 @@ The model and contract paths can also be set via environment variables:
 ```bash
 export CESAR_MODEL_PATH=artifact_storage/model_<version>.joblib
 export CESAR_CONTRACT_PATH=artifact_storage/contract_<version>.json
-export CESAR_DATA_CSV=data/dvf_75015_all_years.csv
+export CESAR_DATA_CSV=data/dvf_75_all_arrondissements.csv
 ```
 
 ### Undervaluation detection
@@ -78,7 +78,7 @@ Properties where either price is missing are left unscored.
 ### Launch the UI
 Set env vars and start the server (to type in the terminal): 
 
-- export CESAR_DATA_CSV=data/dvf_75015_all_years.csv # here need to change the number of the arrondissement 
+- export CESAR_DATA_CSV=data/dvf_75_all_arrondissements.csv
 - export CESAR_MODEL_PATH=artifact_storage/model_minimal.joblib
 - export CESAR_CONTRACT_PATH=artifact_storage/contract_minimal.json
 
@@ -105,4 +105,5 @@ Disclaimer: The UI was built with AI assistance, using the following prompt: "Ba
 - **Data range:** DVF data covers 2020–2024. The model does not account for market drift after the training period.
 - **Property types:** only `Appartement`, `Maison`.
 - **Undervaluation signal:** the gap between actual transaction price and ML estimate reflects model error as much as a true deal, it should not be taken as financial advice.
-- **Limited UI:** for the moment the UI is only based on the arrondissement the user imports
+- **Data quality:** only open-market sales (`nature_mutation = Vente`) above 10,000€ are included. Exchanges, court sales, off-plan transactions and other non-market transfers are excluded as they don't reflect real buyer/seller prices.
+- **Limited UI:** search supports all 20 Paris arrondissements. Queries mentioning multiple arrondissements (e.g. "11th or 17th") will return results from all of them.
